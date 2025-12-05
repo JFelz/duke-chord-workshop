@@ -6,7 +6,7 @@ The "Duke & Chord Music" application is a client-side JavaScript Single Page App
 ### Target Audience
 The application targets customers interested in purchasing or selling musical instruments, as well as students looking to browse or register for music classes offered by the organization.
  
-## Architecture Documentation
+# Architecture Documentation
  
 ### 1. Single Page Application (SPA)
 The application is structured as a Single Page Application, where the main HTML file ([`src/index.html`](src/index.html)) serves as a container. All primary content rendering and navigation are managed dynamically by JavaScript, utilizing the URL query parameters (e.g., `?view=store`) for basic client-side routing.
@@ -39,10 +39,43 @@ The core of state communication is handled using the **Observer Pattern** (also 
 ### 3. Component Pattern (Structure)
 The UI adheres to the **Component Pattern**. The application is built by composing reusable, independent JavaScript functions that represent small, highly cohesive UI parts. These functions are responsible for generating self-contained HTML strings, promoting reusability and a modular UI structure.
 
+# Code Organization
+
+The project adheres to a clear, feature-based directory structure to separate responsibilities between the backend mock server, the client-side single-page application (SPA), and configuration files.
+
+### Root Directory
+
+| File/Directory | Purpose |
+| :--- | :--- |
+| [`server.js`](server.js) | Node.js entry point. Sets up the static file server and mounts `json-server` to handle the mock API. |
+| `package.json` | Project metadata and dependencies, primarily `json-server`. |
+| [`api/`](api/) | Contains mock data files (e.g., [`api/database.json`](api/database.json)) used by `json-server`. |
+| [`src/`](src/) | Root directory for all client-side application code and assets. |
+
+### Client-Side Structure (`src/`)
+
+| Directory | Purpose |
+| :--- | :--- |
+| `src/index.html` | The main HTML container file for the SPA. |
+| [`src/scripts/`](src/scripts/) | Contains all JavaScript application logic and components. |
+| [`src/styles/`](src/styles/) | Contains all CSS files for styling components and layouts. |
+| [`src/audio/`](src/audio/) | Static sound files used for interactive features. |
+| [`src/images/`](src/images/) | Static image assets (e.g., instrument pictures). |
+
+### JavaScript Logic Structure (`src/scripts/`)
+
+The JavaScript files are further organized by function:
+
+| Directory | Purpose |
+| :--- | :--- |
+| `src/scripts/data/` | Centralized state management modules (e.g., `UserStateManager`, `InstrumentsStateManager`) and API settings. These modules handle all CRUD operations and state broadcasting. |
+| `src/scripts/auth/` | Components responsible for user authentication views and logic (Login, Register). |
+| `src/scripts/instruments/` | Views and components related to the instrument marketplace (List, Detail, Form). |
+| `src/scripts/classes/` | Views and components related to music class listings and details. |
+| `src/scripts/nav/` | Components for the navigation bar and header elements. |
+| [`src/scripts/DukeChord.js`](src/scripts/DukeChord.js) | The main application component, acting as the Front Controller for view routing. |
 
 ## Core Component Relationships
- 
-The application follows a loosely coupled, component-driven architecture:
  
 ### 1. Entry Point ([`src/index.html`](src/index.html) & [`src/scripts/main.js`](src/scripts/main.js))
 *   [`src/index.html`](src/index.html) defines the root `div` elements (`#container`, `#header`, `#content`).
@@ -64,22 +97,19 @@ The application follows a loosely coupled, component-driven architecture:
 ### 5. API Mock Server ([`server.js`](server.js) / `json-server`)
 *   A Node.js server that routes all API requests to the mock database ([`api/database.json`](api/database.json)), providing necessary CRUD functionality for all application data.
 
-## User Authentication Flow
+# Frontend Technology Choice
 
-The application uses a stateless, client-side authentication mechanism suitable for a mock environment, relying on a JSON API mock server and browser storage.
+The Duke & Chord Music application is intentionally built using **Vanilla JavaScript (ES6 modules)** and browser-native APIs. The application uses a stateless, client-side authentication mechanism suitable for a mock environment, relying on a Node.js-based JSON API mock server (`json-server`) and browser storage.
 
-### 1. Registration
-The [`src/scripts/auth/Register.js`](src/scripts/auth/Register.js) component captures the user's name and email. On form submission, it performs a `POST` request to the `/api/users` endpoint to create a new user record in the mock database. Upon successful creation, the application calls the `login()` function to immediately establish a session.
+### Rationale for Vanilla JS
+This approach offers several key benefits for this type of smaller, learning-focused application:
+*   **Low Overhead and Simplicity:** Eliminating large framework dependencies results in a smaller bundle size and simpler tooling (only requiring Node.js and json-server).
+*   **Direct Browser Interaction:** The architecture relies on direct DOM manipulation and native Custom Events (Observer Pattern) for state synchronization, promoting a deeper understanding of how modern browsers handle UI updates and decoupling.
+*   **Fit for Purpose:** For an application with modest complexity and a mock API backend, the overhead of a full framework is unnecessary. The modular structure of the JS files provides sufficient organization without the need for framework-specific lifecycle management.
 
-### 2. Login
-The [`src/scripts/auth/Login.js`](src/scripts/auth/Login.js) component captures the user's email. On form submission, it performs a `GET` request to the `/api/users?email=[email]` endpoint to search for the matching user record. If found, the session is initiated via the `login()` function.
+### Comparison to Frameworks
+While frameworks offer advanced features (e.g., Virtual DOM for optimized updates, complex routing libraries, sophisticated component lifecycles), the Vanilla JS approach with custom state management was the preferred route here for maximum transparency and simplicity in the data flow.
 
-### 3. Session Persistence
-The [`src/scripts/data/UserStateManager.js`](src/scripts/data/UserStateManager.js) module manages persistence:
-*   **Initialization:** The `login(user)` function Base64 encodes the entire user object (`btoa(JSON.stringify(user))`) and stores this string in the browser's `localStorage` under the key `"chord_user"`.
-*   **Validation:** The `isAuthenticated()` function checks the in-memory state first, and then decodes the `localStorage` item (using `atob()`) to repopulate the application's state if the user object is present, allowing sessions to persist across page reloads.
-*   **Security Note:** This mechanism is intended for development/mocking purposes and lacks production security features like password hashing or secure tokens.
- 
 ## Data Flow and Communication
 
 Data movement in Duke & Chord Music is unidirectional and follows a clear lifecycle: from persistence, through state management, and finally to the user interface, mediated by asynchronous operations and custom events.
@@ -108,7 +138,45 @@ Data movement in Duke & Chord Music is unidirectional and follows a clear lifecy
     2.  Generate the updated HTML string based on the fresh data.
     3.  Replace the existing DOM element content, thus re-rendering the relevant part of the UI.
 
-## Main Features
+# Development Setup
+
+The Duke & Chord Music application requires Node.js and npm/yarn for running the mock API server and managing dependencies.
+
+### Installation Instructions
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone [repository URL]
+    cd duke-chord-workshop
+    ```
+2.  **Install Dependencies:**
+    Use npm to install the required package (`json-server`):
+    ```bash
+    npm install
+    ```
+
+### Running the Application (Integrated Approach)
+
+The standard way to run the application is via the integrated server script:
+1.  **Start the Server:**
+    Run the start script defined in package.json:
+    ```bash
+    npm start
+    ```
+    *This command executes `node server.js` which serves the static client files from the `src/` directory and mounts the JSON mock API on port 5002.*
+
+2.  **Access the Application:**
+    Access the application in your web browser: `http://localhost:5002`
+
+### Running the API Server Directly (For Testing Only)
+
+If you only need to run the mock REST API without serving the frontend HTML/JS files, you can execute `json-server` directly. Note that the client application will not fully function without the static file server:
+
+```bash
+# Assuming json-server is locally available via npx
+npx json-server --watch api/database.json --port 5002
+```
+# Main Features
 *   **User Authentication:** Handles user login, registration, and persistent session management.
 *   **Instrument Marketplace:** Allows users to view, filter, and see detailed information about available instruments. Includes a form for users to submit instruments for sale.
 *   **Educational Resources:** Provides listings and details for music classes, fetched from the API and associated with musicians/instructors.
