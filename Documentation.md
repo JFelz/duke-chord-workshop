@@ -168,11 +168,12 @@ The standard way to run the application is via the integrated server script:
 2.  **Access the Application:**
     Access the application in your web browser: `http://localhost:5002`
 
-### Running the API Server Directly
+### Running the API Server Directly (For Testing Only)
 
-You can execute `json-server` directly. Note that the client application will not fully function without the static file server:
+If you only need to run the mock REST API without serving the frontend HTML/JS files, you can execute `json-server` directly. Note that the client application will not fully function without the static file server:
 
 ```bash
+# Assuming json-server is locally available via npx
 npx json-server --watch api/database.json --port 5002
 ```
 # Main Features
